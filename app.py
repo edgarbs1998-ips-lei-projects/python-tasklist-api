@@ -56,13 +56,13 @@ api.add_resource(UserLogout, '/user/logout/',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
 api.add_resource(User, '/user/',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
-api.add_resource(ProjectList, '/project/',
+api.add_resource(ProjectList, '/projects/',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
-api.add_resource(Project, '/project/<int:project_id>/',
+api.add_resource(Project, '/projects/<int:project_id>/',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
-api.add_resource(TaskList, '/project/<int:project_id>/task/',
+api.add_resource(TaskList, '/projects/<int:project_id>/tasks/',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
-api.add_resource(Task, '/project/<int:project_id>/task/<int:task_id>/',
+api.add_resource(Task, '/projects/<int:project_id>/tasks/<int:task_id>/',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
 
 
