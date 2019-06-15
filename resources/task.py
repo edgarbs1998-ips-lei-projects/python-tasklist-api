@@ -9,19 +9,28 @@ from resources.base import BaseResource
 
 class TaskList(BaseResource):
     def get(self, project_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument('page', type=int, required=False)
+        parser.add_argument('limit', type=int, required=False)
+        args = parser.parse_args()
+
         tasks = []
         try:
+            query = db.Task.select().where(
+                db.Task.project == project_id
+            )
+            total = query.count()
+            if args['page'] is not None and args['limit'] is not None:
+                query = query.paginate(args['page'], args['limit'])
             with db.database.atomic():
-                for task in db.Task.select().where(
-                        db.Task.project == project_id
-                ):
+                for task in query:
                     task_dict = model_to_dict(task)
                     del task_dict['project']
                     tasks.append(task_dict)
         except DoesNotExist:
-            return [], 200
+            return {'total': 0, 'data': []}, 200
 
-        return tasks, 200
+        return {'total': total, 'data': tasks}, 200
 
     def post(self, project_id):
         parser = reqparse.RequestParser()

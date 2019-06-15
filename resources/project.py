@@ -11,19 +11,29 @@ from resources.base import BaseResource
 
 class ProjectList(BaseResource):
     def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('page', type=int, required=False)
+        parser.add_argument('limit', type=int, required=False)
+        args = parser.parse_args()
+
         projects = []
         try:
             with db.database.atomic():
-                for project in db.Project.select().where(
-                        db.Project.user == session['user']['id']
-                ):
-                    project_dict = model_to_dict(project)
-                    del project_dict['user']
-                    projects.append(project_dict)
+                query = db.Project.select().where(
+                    db.Project.user == session['user']['id']
+                )
+                total = query.count()
+                if args['page'] is not None and args['limit'] is not None:
+                    query = query.paginate(args['page'], args['limit'])
+                with db.database.atomic():
+                    for project in query:
+                        project_dict = model_to_dict(project)
+                        del project_dict['user']
+                        projects.append(project_dict)
         except DoesNotExist:
-            return [], 200
+            return {'total': 0, 'data': []}, 200
 
-        return projects, 200
+        return {'total': total, 'data': projects}, 200
 
     def post(self):
         parser = reqparse.RequestParser()
