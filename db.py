@@ -22,7 +22,7 @@ class Project(Model):
     user = ForeignKeyField(User, backref='projects')
     title = CharField()
     creation_date = DateTimeField(default=datetime.now)
-    last_updated = DateTimeField(null=True)
+    last_updated = DateTimeField(default=datetime.now)
 
     class Meta:
         database = database
