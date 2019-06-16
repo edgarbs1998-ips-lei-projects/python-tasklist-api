@@ -14,10 +14,18 @@ class TaskList(BaseResource):
         parser.add_argument('limit', type=int, required=False)
         args = parser.parse_args()
 
+        try:
+            with db.database.atomic():
+                project = db.Project.select().where(
+                    db.Project.id == project_id
+                ).get()
+        except DoesNotExist:
+            return {'message': 'That project does not exists'}, 404
+
         tasks = []
         try:
             query = db.Task.select().where(
-                db.Task.project == project_id
+                db.Task.project == project.id
             ).order_by(db.Task.order.desc())
             total = query.count()
             if args['page'] is not None and args['limit'] is not None:
@@ -35,18 +43,19 @@ class TaskList(BaseResource):
     def post(self, project_id):
         parser = reqparse.RequestParser()
         parser.add_argument('title', type=str, required=True)
-        parser.add_argument('due_date', type=datetime, required=False)
+        parser.add_argument('due_date', type=lambda x: datetime.fromtimestamp(int(x)), required=True)
         args = parser.parse_args()
 
         try:
             with db.database.atomic():
-                try:
-                    project = db.Project.select().where(
-                        db.Project.id == project_id
-                    ).get()
-                except DoesNotExist:
-                    return {'message': 'That project does not exists'}, 400
+                project = db.Project.select().where(
+                    db.Project.id == project_id
+                ).get()
+        except DoesNotExist:
+            return {'message': 'That project does not exists'}, 404
 
+        try:
+            with db.database.atomic():
                 task = db.Task.create(
                     project=project.id,
                     title=args['title'],
@@ -54,7 +63,7 @@ class TaskList(BaseResource):
                     due_date=args['due_date']
                 )
         except IntegrityError:
-            return {'message': 'You are already using that task title on selected project'}, 400
+            return {'message': 'You are already using that task title on this project'}, 400
 
         task_dict = model_to_dict(task)
         del task_dict['project']
@@ -66,12 +75,20 @@ class Task(BaseResource):
     def get(self, project_id, task_id):
         try:
             with db.database.atomic():
+                project = db.Project.select().where(
+                    db.Project.id == project_id
+                ).get()
+        except DoesNotExist:
+            return {'message': 'That project does not exists'}, 404
+
+        try:
+            with db.database.atomic():
                 task = db.Task.select().where(
-                    db.Task.project == project_id,
+                    db.Task.project == project.id,
                     db.Task.id == task_id
                 ).get()
         except DoesNotExist:
-            return {'message': 'That task does not exists'}, 400
+            return {'message': 'That task does not exists'}, 404
 
         task_dict = model_to_dict(task)
         del task_dict['project']
@@ -81,12 +98,20 @@ class Task(BaseResource):
     def delete(self, project_id, task_id):
         try:
             with db.database.atomic():
+                project = db.Project.select().where(
+                    db.Project.id == project_id
+                ).get()
+        except DoesNotExist:
+            return {'message': 'That project does not exists'}, 404
+
+        try:
+            with db.database.atomic():
                 db.Task.delete().where(
-                    db.Task.project == project_id,
+                    db.Task.project == project.id,
                     db.Task.id == task_id
                 ).execute()
         except DoesNotExist:
-            return {'message': 'That task does not exists'}, 400
+            return {'message': 'That task does not exists'}, 404
 
         return '', 204
 
@@ -100,8 +125,16 @@ class Task(BaseResource):
 
         try:
             with db.database.atomic():
+                project = db.Project.select().where(
+                    db.Project.id == project_id
+                ).get()
+        except DoesNotExist:
+            return {'message': 'That project does not exists'}, 404
+
+        try:
+            with db.database.atomic():
                 task = db.Task.select().where(
-                    db.Task.project == project_id,
+                    db.Task.project == project.id,
                     db.Task.id == task_id
                 ).get()
                 task.title = args['title']
@@ -110,9 +143,9 @@ class Task(BaseResource):
                 task.completed = args['completed']
                 task.save()
         except DoesNotExist:
-            return {'message': 'That task does not exists'}, 400
+            return {'message': 'That task does not exists'}, 404
         except IntegrityError:
-            return {'message': 'You are already using that task title on selected project'}, 400
+            return {'message': 'You are already using that task title on this project'}, 400
 
         task_dict = model_to_dict(task)
         del task_dict['project']

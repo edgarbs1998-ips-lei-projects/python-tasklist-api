@@ -64,7 +64,7 @@ class Project(BaseResource):
                     db.Project.id == project_id
                 ).get()
         except DoesNotExist:
-            return {'message': 'That project does not exists'}, 400
+            return {'message': 'That project does not exists'}, 404
 
         project_dict = model_to_dict(project)
         del project_dict['user']
@@ -82,7 +82,7 @@ class Project(BaseResource):
                     db.Project.id == project_id
                 ).execute()
         except DoesNotExist:
-            return {'message': 'That project does not exists'}, 400
+            return {'message': 'That project does not exists'}, 404
 
         return '', 204
 
@@ -101,7 +101,7 @@ class Project(BaseResource):
                 project.last_updated = datetime.utcnow()
                 project.save()
         except DoesNotExist:
-            return {'message': 'That project does not exists'}, 400
+            return {'message': 'That project does not exists'}, 404
         except IntegrityError:
             return {'message': 'You are already using that project title'}, 400
 
