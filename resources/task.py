@@ -50,7 +50,7 @@ class TaskList(BaseResource):
                 task = db.Task.create(
                     project=project.id,
                     title=args['title'],
-                    order=args['order'],
+                    order=0,
                     due_date=args['due_date']
                 )
         except IntegrityError:
