@@ -74,6 +74,9 @@ class Project(BaseResource):
     def delete(self, project_id):
         try:
             with db.database.atomic():
+                db.Task.delete().where(
+                    db.Task.project == project_id
+                ).execute()
                 db.Project.delete().where(
                     db.Project.user == session['user']['id'],
                     db.Project.id == project_id
