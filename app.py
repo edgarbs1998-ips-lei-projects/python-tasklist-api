@@ -3,7 +3,6 @@ from functools import wraps
 
 from flask import Flask, session, make_response, jsonify
 from flask_restful import Api, abort
-from flask_cors import CORS
 
 import settings
 from db import database, create_tables
@@ -14,7 +13,6 @@ from resources.user import User, UserRegister, UserLogin, UserLogout, UserPasswo
 app = Flask(__name__)
 app.secret_key = os.urandom(16)
 api = Api(app, prefix='/api')
-CORS(app)
 
 
 @app.before_request
