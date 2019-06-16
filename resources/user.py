@@ -68,6 +68,25 @@ class UserLogout(BaseResource):
         return {'success': True}, 200
 
 
+class UserPassword(BaseResource):
+    def put(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('password', type=str, required=True)
+        args = parser.parse_args()
+
+        try:
+            with db.database.atomic():
+                user = db.User.select().where(
+                    db.User.id == session['user']['id']
+                ).get()
+                user.password = hashlib.sha256(args['password'].encode()).hexdigest()
+                user.save()
+        except DoesNotExist:
+            return {'success': True, 'message': 'That user does not exists'}, 404
+
+        return {'success': True}, 200
+
+
 class User(BaseResource):
     def get(self):
         return session['user'], 200

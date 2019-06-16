@@ -8,7 +8,7 @@ import settings
 from db import database, create_tables
 from resources.project import ProjectList, Project
 from resources.task import TaskList, Task
-from resources.user import User, UserRegister, UserLogin, UserLogout
+from resources.user import User, UserRegister, UserLogin, UserLogout, UserPassword
 
 app = Flask(__name__, static_url_path='/static')
 app.secret_key = os.urandom(16)
@@ -53,6 +53,8 @@ api.add_resource(UserRegister, '/user/register/',
 api.add_resource(UserLogin, '/user/login/',
                  resource_class_kwargs={'database': database})
 api.add_resource(UserLogout, '/user/logout/',
+                 resource_class_kwargs={'database': database, 'authenticate': authenticate})
+api.add_resource(UserPassword, '/user/password/',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
 api.add_resource(User, '/user/',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
