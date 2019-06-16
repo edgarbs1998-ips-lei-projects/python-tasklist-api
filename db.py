@@ -21,8 +21,8 @@ class User(Model):
 class Project(Model):
     user = ForeignKeyField(User, backref='projects')
     title = CharField()
-    creation_date = DateTimeField(default=datetime.now)
-    last_updated = DateTimeField(default=datetime.now)
+    creation_date = DateTimeField(default=datetime.utcnow)
+    last_updated = DateTimeField(default=datetime.utcnow)
 
     class Meta:
         database = database
@@ -35,7 +35,7 @@ class Task(Model):
     project = ForeignKeyField(Project, backref='tasks')
     title = TextField()
     order = IntegerField()
-    creation_date = DateTimeField(default=datetime.now)
+    creation_date = DateTimeField(default=datetime.utcnow)
     due_date = DateTimeField(null=True)
     completed = BooleanField(default=False)
 

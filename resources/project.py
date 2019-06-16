@@ -95,7 +95,7 @@ class Project(BaseResource):
                     db.Project.id == project_id
                 ).get()
                 project.title = args['title']
-                project.last_updated = datetime.now()
+                project.last_updated = datetime.utcnow()
                 project.save()
         except DoesNotExist:
             return {'message': 'That project does not exists'}, 400
