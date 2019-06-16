@@ -3,6 +3,7 @@ from functools import wraps
 
 from flask import Flask, session, make_response, jsonify
 from flask_restful import Api, abort
+from flask_cors import CORS
 
 import settings
 from db import database, create_tables
@@ -10,9 +11,10 @@ from resources.project import ProjectList, Project
 from resources.task import TaskList, Task
 from resources.user import User, UserRegister, UserLogin, UserLogout, UserPassword
 
-app = Flask(__name__, static_url_path='/static')
+app = Flask(__name__)
 app.secret_key = os.urandom(16)
 api = Api(app, prefix='/api')
+CORS(app)
 
 
 @app.before_request
@@ -40,11 +42,6 @@ def authenticate(func):
             abort(401)
         return func(*args, **kwargs)
     return wrapper
-
-
-@app.route('/')
-def index():
-    return app.send_static_file('index.html')
 
 
 # API Routes
