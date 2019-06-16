@@ -18,7 +18,7 @@ class TaskList(BaseResource):
         try:
             query = db.Task.select().where(
                 db.Task.project == project_id
-            )
+            ).order_by(db.Task.order.desc())
             total = query.count()
             if args['page'] is not None and args['limit'] is not None:
                 query = query.paginate(args['page'], args['limit'])

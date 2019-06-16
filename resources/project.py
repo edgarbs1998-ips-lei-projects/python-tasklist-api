@@ -21,7 +21,7 @@ class ProjectList(BaseResource):
             with db.database.atomic():
                 query = db.Project.select().where(
                     db.Project.user == session['user']['id']
-                )
+                ).order_by(db.Project.last_updated.desc())
                 total = query.count()
                 if args['page'] is not None and args['limit'] is not None:
                     query = query.paginate(args['page'], args['limit'])
