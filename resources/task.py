@@ -96,7 +96,7 @@ class Task(BaseResource):
         parser.add_argument('title', type=str, required=True)
         parser.add_argument('order', type=int, required=True)
         parser.add_argument('due_date', type=lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%S'), required=True)
-        parser.add_argument('completed', type=lambda x: x.lower() in ['true', '1'], required=True)
+        parser.add_argument('completed', type=bool, required=True)
         args = parser.parse_args()
 
         try:
