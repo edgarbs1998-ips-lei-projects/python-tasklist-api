@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from peewee import SqliteDatabase, Model, CharField, ForeignKeyField, DateTimeField, TextField, IntegerField, \
-    BooleanField
+    BooleanField, fn
+from playhouse.signals import pre_save
 
 import settings
 
@@ -42,8 +43,16 @@ class Task(Model):
     class Meta:
         database = database
         indexes = (
-            (('project', 'order'), True),
+            (('project', 'title'), True),
         )
+
+
+@pre_save(sender=Task)
+def on_save_handler(model_class, instance, created):
+    # find max value of temp_id in model
+    # increment it by one and assign it to model instance object
+    next_value = Task.select(fn.Max(Task.order))[0].order + 1
+    instance.order = next_value
 
 
 def create_tables():

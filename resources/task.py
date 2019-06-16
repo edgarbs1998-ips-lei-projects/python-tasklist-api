@@ -35,7 +35,6 @@ class TaskList(BaseResource):
     def post(self, project_id):
         parser = reqparse.RequestParser()
         parser.add_argument('title', type=str, required=True)
-        parser.add_argument('order', type=int, required=True)
         parser.add_argument('due_date', type=datetime, required=False)
         args = parser.parse_args()
 
@@ -55,7 +54,7 @@ class TaskList(BaseResource):
                     due_date=args['due_date']
                 )
         except IntegrityError:
-            return {'message': 'There is a conflict with task order value'}, 400
+            return {'message': 'You are already using that task title on selected project'}, 400
 
         task_dict = model_to_dict(task)
         del task_dict['project']
@@ -95,7 +94,7 @@ class Task(BaseResource):
         parser = reqparse.RequestParser()
         parser.add_argument('title', type=str, required=True)
         parser.add_argument('order', type=int, required=True)
-        parser.add_argument('due_date', type=lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%S'), required=True)
+        parser.add_argument('due_date', type=lambda x: datetime.fromtimestamp(int(x)), required=True)
         parser.add_argument('completed', type=bool, required=True)
         args = parser.parse_args()
 
@@ -113,7 +112,7 @@ class Task(BaseResource):
         except DoesNotExist:
             return {'message': 'That task does not exists'}, 400
         except IntegrityError:
-            return {'message': 'There is a conflict with task order value'}, 400
+            return {'message': 'You are already using that task title on selected project'}, 400
 
         task_dict = model_to_dict(task)
         del task_dict['project']
