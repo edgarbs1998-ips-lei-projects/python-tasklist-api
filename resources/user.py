@@ -27,18 +27,18 @@ class UserRegister(BaseResource):
                     password=hashlib.sha256(args['password'].encode()).hexdigest()
                 )
         except IntegrityError:
-            return {'success': False, 'message': 'That username/email is already taken'}, 400
+            return {'message': 'That username/email is already taken'}, 400
 
         user_dict = model_to_dict(user)
         del user_dict['password']
 
-        return {'success': True, 'user': user_dict}, 201
+        return user_dict, 201
 
 
 class UserLogin(BaseResource):
     def post(self):
         if session.get('user'):
-            return {'success': False, 'message': 'User is already logged in, please logout first.'}, 400
+            return {'message': 'User is already logged in, please logout first.'}, 400
 
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, required=True)
@@ -49,7 +49,7 @@ class UserLogin(BaseResource):
             with db.database.atomic():
                 user = db.User.select().where(db.User.username == args['username']).get()
         except DoesNotExist:
-            return {'success': False, 'message': 'That username does not exists'}, 404
+            return {'message': 'That username does not exists'}, 404
 
         password = hashlib.sha256(args['password'].encode()).hexdigest()
 
@@ -57,15 +57,15 @@ class UserLogin(BaseResource):
             user_dict = model_to_dict(user)
             del user_dict['password']
             session['user'] = user_dict
-            return {'success': True, 'user': user_dict}, 200
+            return user_dict, 200
         else:
-            return {'success': False, 'message': 'Incorrect password'}, 403
+            return {'message': 'Incorrect password'}, 403
 
 
 class UserLogout(BaseResource):
     def post(self):
         session.clear()
-        return {'success': True}, 200
+        return '', 204
 
 
 class UserPassword(BaseResource):
@@ -82,14 +82,14 @@ class UserPassword(BaseResource):
                 user.password = hashlib.sha256(args['password'].encode()).hexdigest()
                 user.save()
         except DoesNotExist:
-            return {'success': True, 'message': 'That user does not exists'}, 404
+            return {'message': 'That user does not exists'}, 404
 
-        return {'success': True}, 200
+        return '', 204
 
 
 class User(BaseResource):
     def get(self):
-        return {'success': True, 'user': session['user']}, 200
+        return session['user'], 200
 
     def put(self):
         parser = reqparse.RequestParser()
@@ -108,11 +108,11 @@ class User(BaseResource):
                 user.username = args['username']
                 user.save()
         except DoesNotExist:
-            return {'success': True, 'message': 'That user does not exists'}, 404
+            return {'message': 'That user does not exists'}, 404
         except IntegrityError:
-            return {'success': True, 'message': 'That username/email is already taken'}, 400
+            return {'message': 'That username/email is already taken'}, 400
 
         user_dict = model_to_dict(user)
         del user_dict['password']
         session['user'] = user_dict
-        return {'success': True, 'user': user_dict}, 200
+        return user_dict, 200

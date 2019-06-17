@@ -3,6 +3,7 @@ from functools import wraps
 
 from flask import Flask, session, make_response, jsonify
 from flask_restful import Api, abort
+from flask_cors import CORS
 
 import settings
 from db import database, create_tables
@@ -12,6 +13,7 @@ from resources.user import User, UserRegister, UserLogin, UserLogout, UserPasswo
 
 app = Flask(__name__)
 app.secret_key = os.urandom(16)
+CORS(app, supports_credentials=True)
 api = Api(app, prefix='/api')
 
 
@@ -43,23 +45,23 @@ def authenticate(func):
 
 
 # API Routes
-api.add_resource(UserRegister, '/user/register/',
+api.add_resource(UserRegister, '/user/register',
                  resource_class_kwargs={'database': database})
-api.add_resource(UserLogin, '/user/login/',
+api.add_resource(UserLogin, '/user/login',
                  resource_class_kwargs={'database': database})
-api.add_resource(UserLogout, '/user/logout/',
+api.add_resource(UserLogout, '/user/logout',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
-api.add_resource(UserPassword, '/user/password/',
+api.add_resource(UserPassword, '/user/password',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
-api.add_resource(User, '/user/',
+api.add_resource(User, '/user',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
-api.add_resource(ProjectList, '/projects/',
+api.add_resource(ProjectList, '/projects',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
-api.add_resource(Project, '/projects/<int:project_id>/',
+api.add_resource(Project, '/projects/<int:project_id>',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
-api.add_resource(TaskList, '/projects/<int:project_id>/tasks/',
+api.add_resource(TaskList, '/projects/<int:project_id>/tasks',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
-api.add_resource(Task, '/projects/<int:project_id>/tasks/<int:task_id>/',
+api.add_resource(Task, '/projects/<int:project_id>/tasks/<int:task_id>',
                  resource_class_kwargs={'database': database, 'authenticate': authenticate})
 
 
